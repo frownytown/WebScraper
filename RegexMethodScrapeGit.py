@@ -19,7 +19,7 @@ index_page_url = ''
 domain_name = ''
 
 def extract_urls(index_page):
-	# create list to store urls
+	# create list to store url
 	list_of_urls = []
 
 	fiction_index = urlopen(index_page)
