@@ -1,3 +1,11 @@
+#! /usr/bin/env python
+
+# Doesn't run in Windows Terminal due to some sort of console font issue
+# Can get the output by running it through idle in the terminal with the command
+# "py -3.6 -midlelib -r .\wuxiascrape.py"
+
+# For Linux "python3 wuxiascrape.py"
+
 from bs4 import BeautifulSoup
 import re
 import sys
