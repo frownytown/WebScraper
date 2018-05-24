@@ -36,8 +36,12 @@ fictionpress_drop_tag_options = 'option'
 
 # WuxiaWorld variables
 url = 'https://www.wuxiaworld.com/novel/i-shall-seal-the-heavens/issth-book-1-chapter-1'
+wuxia_index_page = 'https://www.wuxiaworld.com/novel/i-shall-seal-the-heavens'
 req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
 windows_write_file = 'C:\code\WebScraper\WebScraper\wuxiaoutput.txt'
+wuxia_fiction_title = "/novel/i-shall-seal-the-heavens/"
+wuxia_domain = 'https://www.wuxiaworld.com'
+req_index = Request(wuxia_index_page, headers={'User-Agent': 'Mozilla/5.0'})
 
 search_param = 'div'
 attr_1_param = 'class'
@@ -90,6 +94,24 @@ def extract_urls(index_page):
     # get the rows
     for anchor in table_content.find_all('a', href=True, limit=5):
         list_of_urls.append(anchor.get('href'))
+
+    return list_of_urls
+
+
+def extract_wuxia_urls(index_page):
+    # Try and extract the urls from the fictionn's index page on WuxiaWorld
+    list_of_urls = []
+
+    page = urlopen(req_index).read().decode("utf-8")
+    soup = BeautifulSoup(page, 'html.parser')
+    page_links = soup.find_all("div", {"class": "panel panel-default"})
+    # print(len(page_links))
+    for d in page_links:
+        links = d.find_all('a', href=True)
+        for a in links:
+            # list_of_urls.append(a.get('href'))
+            if wuxia_fiction_title in a.get('href'):
+                list_of_urls.append(a.get('href'))
 
     return list_of_urls
 
@@ -155,6 +177,16 @@ def url_generator(list_of_urls, location_selection):
                       file=sys.stdout)
                 time.sleep(2)
 
+        elif location_selection == "wuxiaworld":
+            for foo in list_of_urls:
+                request = Request((wuxia_domain + foo),
+                                  headers={'User-Agent': 'Mozilla/5.0'})
+                get_wuxia_content(request, search_param, attr_1_param,
+                                  attr_2_param)
+                i += 1
+                print("Content for chapter " + str(i) + " parsed \n")
+                time.sleep(2)
+
 
     except:
         e = sys.exc_info()[0]
@@ -197,7 +229,7 @@ def get_wuxia_content(req, search_param, attr_1_param, attr_2_param):
     content = content.replace(".", ". ")
     content = content.replace("  ", " ")
 
-    with io.open(windows_write_file, 'w', encoding="utf-8") as f:
+    with io.open(windows_write_file, 'a', encoding="utf-8") as f:
         f.write(content)
         safe_print(content)
 
@@ -220,7 +252,8 @@ if __name__ == '__main__':
             url_generator(fiction_list_of_urls, location)
         # print("url generator and get_page_content passed", file=sys.stdout)
         elif location == "wuxiaworld":
-            get_wuxia_content(req, search_param, attr_1_param, attr_2_param)
+            list_of_urls = extract_wuxia_urls(req_index)
+            url_generator(list_of_urls, location)
 
     except:
         e = sys.exc_info()[0]
